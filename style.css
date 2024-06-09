@@ -1,5 +1,19 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;800&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Inter&family=Poppins:wght@400;500&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+body{
+  font-family: "Poppins", sans-serif;
+  background-color: #e1e1e1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; 
+  width: 100%;
+}
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
