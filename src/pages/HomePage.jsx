@@ -4,10 +4,12 @@ import { connect } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Toaster, toast } from "sonner";
 import { IoMdClose } from "react-icons/io";
+import { setCurrentUser } from "../redux/user/user.actions";
 
 const Homepage = ({ currentUser }) => {
   const [jobDescription, setJobDescription] = useState("");
   const [uploadModal, setUploadModal] = useState(false);
+  const [JDModal, setJDModal] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [changeButtonText, setChangeButtonText] = useState(false);
   const navigate = useNavigate();
@@ -46,60 +48,82 @@ const Homepage = ({ currentUser }) => {
     }
   };
 
+  const signInWithGoogle = () => {
+    if (currentUser) {
+      return toast.message("User already signed in");
+    }
+    setLoading(true);
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const user = result.user;
+        toast.message("Signed in as " + user.email);
+        setCurrentUser(user);
+        sessionStorage.setItem("token", token);
+        setTimeout(() => {
+          navigate("/");
+          setLoading(false);
+        }, 1000);
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.log(error.message, error.code);
+        toast.error(error.code);
+      });
+  };
+
   return (
-    <main className="h-full flex items-center justify-center">
+    <main className="flex justify-center">
       <Toaster richColors position="top-right" />
-      <div className="flex lg:flex-row flex-col justify-between items-center lg:w-[65%] lg:gap-0 gap-5">
-        <div className="lg:w-[1/3] lg:text-left text-center">
-          <h1 className="font-extrabold text-5xl text-[#212121]">
-            CV Analysis.
-          </h1>
-          <p className="lg:text-[17px] text-sm mt-2">
-            Evaluate candidates CV's/Resumes easily with AI.
-          </p>
+      <div className="text-white flex flex-col lg:w-[50%] w-full mt-[50px]">
+        <div className="mb-[60px] flex justify-end justify-self-end">
+          {currentUser ? (
+            <button className="mr-10">
+              <img src={currentUser.photoURL} className="rounded-full w-[40px]" alt="" />
+            </button>
+          ) : (
+            <button
+              onClick={() => signInWithGoogle()}
+              className="p-2  bg-white rounded-full text-black mr-10"
+            >
+              <div className="">
+                <small className="block">Google</small>
+                <small>Sign In</small>
+              </div>
+            </button>
+          )}
         </div>
-        <div className="flex flex-col lg:flex-grow lg:items-end w-[90%] lg:w-fit">
-          <div className="">
-            <div className="">
-              <label className="block text-[#212121] lg:text-lg text-sm">
-                Job Description:
-              </label>
-              <textarea
-                style={{ resize: "none" }}
-                className="border-[1px] max-w-full border-[#9e9d9d] rounded-md p-2"
-                placeholder="Paste your job description here"
-                cols={25}
-                rows={6}
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-              ></textarea>
+        <div className="flex flex-row justify-evenly">
+          <div className="flex justify-center items-center">
+            <div className="flex flex-col">
+              <h1 className="font-extrabold text-xl">Evaluate a CV of</h1>
+              <h1 className="font-extrabold text-xl">a candidate with AI</h1>
             </div>
-            <div className="mt-3 w-full flex flex-col items-center gap-3.5">
-              <button
-                onClick={() => {
-                  setSelectedFiles([]);
-                  setUploadModal(true);
-                }}
-                className="transition-all hover:scale-105 rounded-lg bg-[#313131] text-white p-3 w-[300px]"
-              >
-                {changeButtonText ? (
-                  <div className="flex items-center gap-2 justify-center">
-                    <IoCloudUploadOutline size={25} /> {selectedFiles.length} CV
-                    uploaded
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 justify-center">
-                    <IoCloudUploadOutline size={25} /> Upload Some CV
-                  </div>
-                )}
-              </button>
-              <button
-                onClick={() => analyzeCV()}
-                className="transition-all hover:scale-105 rounded-lg bg-[#313131]  text-white p-3 w-[250px]"
-              >
-                Analyze
-              </button>
-            </div>
+          </div>
+          <div className="flex flex-col gap-10 font-semibold">
+            <button
+              onClick={() => {
+                setJDModal(true);
+              }}
+              className="h-[59px] w-[158px] bg-[#3a3a3a]"
+            >
+              {!changeButtonText
+                ? "Paste your job description"
+                : "Job description pasted"}
+            </button>
+            <button className="h-[59px] w-[158px] bg-[#3a3a3a]">
+              Upload some CV
+            </button>
+            <button
+              onClick={() => analyzeCV()}
+              className="h-[42px] w-[158px] bg-[#144d00]"
+            >
+              <div className="flex flex-col">
+                <p>Analyze</p>
+                <small>(10 tokens)</small>
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -133,6 +157,39 @@ const Homepage = ({ currentUser }) => {
           </div>
         </div>
       )}
+      {JDModal && (
+        <div className="absolute flex flex-col justify-center items-center bg-white w-full h-full">
+          <div className="">
+            <textarea
+              style={{ resize: "none" }}
+              className="p-2"
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              rows={15}
+              cols={60}
+              placeholder="Insert your job description here. You don't need to worry about the layout or structure. 
+Just include the essence of the job, tasks, deliverables, requirements, qualifications, skills, etc."
+            ></textarea>
+            <div className="flex justify-center gap-5 mt-3 text-white font-semibold">
+              <button
+                onClick={() => {
+                  setChangeButtonText(true);
+                  setJDModal(false);
+                }}
+                className="h-[56px] w-[174px] bg-[#000000]"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setJDModal(false)}
+                className="h-[56px] w-[174px] bg-[#3a3a3a]"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
@@ -142,5 +199,9 @@ const mapStateToProps = ({ user }) => {
     currentUser: user.currentUser,
   };
 };
-
-export default connect(mapStateToProps)(Homepage);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setCurrentUser: (user) => dispatch(setCurrentUser(user)),
+  };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(Homepage);

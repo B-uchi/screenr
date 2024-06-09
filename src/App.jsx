@@ -29,7 +29,7 @@ class App extends React.Component {
     return (
       <Router>
         <div className="flex flex-col">
-          <Navbar />
+          {/* <Navbar /> */}
           <div className="h-[92vh] overflow-hidden">
             <Routes>
               <Route path={"/"} element={<Homepage />} />

@@ -24,31 +24,7 @@ const Authentication = ({ currentUser }) => {
     setPassword("");
   };
 
-  const signInWIthGoogle = () => {
-    if (currentUser) {
-      return toast.message("User already signed in");
-    }
-    setLoading(true);
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        const user = result.user;
-        toast.message("Signed in as " + user.email);
-        setCurrentUser(user);
-        sessionStorage.setItem("token", token);
-        setTimeout(() => {
-          navigate("/");
-          setLoading(false);
-        }, 1000);
-      })
-      .catch((error) => {
-        setLoading(false)
-        console.log(error.message, error.code);
-        toast.error(error.code);
-      });
-  };
-
+  
   const signIn = () => {
     if (!email || !password) {
       return toast.error("All fields are required");
