@@ -42,14 +42,14 @@ const Navbar = ({ currentUser }) => {
                 <PiCaretDownBold size={20} />
               </button>
               {dropdown && (
-                <div className="absolute top-16 bg-white text-sm text-black p-2 rounded-md -translate-x-[50%]">
-                  <ul className="flex flex-col gap-2">
-                    <li className="">
+                <div className="absolute w-[115px] top-20 lg:top-16 bg-white text-sm text-black p-2 rounded-md -translate-x-[50%]">
+                  <ul className="flex flex-col">
+                    <li className=" border-b-[1px] py-2 ">
                       <a href="mailto:random.search.corp@gmail.com">Support</a>
                     </li>
-                    <li className="cursor-pointer">Billing</li>
+                    <li className="cursor-pointer border-b-[1px] py-2 ">Billing</li>
                     <li
-                      className="cursor-pointer"
+                      className="cursor-pointer py-2"
                       onClick={() => {
                         setDropdown(false);
                         signOutt();
