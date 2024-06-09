@@ -33,11 +33,16 @@ const Homepage = ({ currentUser }) => {
   };
 
   const analyzeCV = () => {
-    if (currentUser) {
-      toast.error("Backend not connected yet");
+    if (jobDescription.length > 50) {
+      if (currentUser) {
+        toast.error("Backend not connected yet");
+      } else {
+        navigate("/signIn");
+        toast.message("User must be signed in to analyze CV's");
+      }
     } else {
-      navigate("/signIn");
-      toast.message("User must be signed in to analyze CV's");
+      toast.error("Job description too short");
+      setJobDescription('')
     }
   };
 
@@ -76,7 +81,8 @@ const Homepage = ({ currentUser }) => {
               >
                 {changeButtonText ? (
                   <div className="flex items-center gap-2 justify-center">
-                    <IoCloudUploadOutline size={25} /> {selectedFiles.length} CV uploaded
+                    <IoCloudUploadOutline size={25} /> {selectedFiles.length} CV
+                    uploaded
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 justify-center">

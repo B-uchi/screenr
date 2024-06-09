@@ -43,6 +43,7 @@ const Authentication = ({ currentUser }) => {
         }, 1000);
       })
       .catch((error) => {
+        setLoading(false)
         console.log(error.message, error.code);
         toast.error(error.code);
       });
