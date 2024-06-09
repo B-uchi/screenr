@@ -42,7 +42,7 @@ const Homepage = ({ currentUser }) => {
       }
     } else {
       toast.error("Job description too short");
-      setJobDescription('')
+      setJobDescription("");
     }
   };
 
@@ -76,7 +76,10 @@ const Homepage = ({ currentUser }) => {
             </div>
             <div className="mt-3 w-full flex flex-col items-center gap-3.5">
               <button
-                onClick={() => setUploadModal(true)}
+                onClick={() => {
+                  setSelectedFiles([]);
+                  setUploadModal(true);
+                }}
                 className="transition-all hover:scale-105 rounded-lg bg-[#313131] text-white p-3 w-[300px]"
               >
                 {changeButtonText ? (
