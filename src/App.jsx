@@ -1,7 +1,4 @@
-import Navbar from "./components/Navbar";
 import Homepage from "./pages/HomePage.jsx";
-import NotFound from "./pages/NotFound";
-import Authentication from "./pages/Authentication";
 import {
   BrowserRouter as Router,
   Route,
@@ -29,12 +26,9 @@ class App extends React.Component {
     return (
       <Router>
         <div className="flex flex-col">
-          {/* <Navbar /> */}
           <div className="h-[92vh] overflow-hidden">
             <Routes>
               <Route path={"/"} element={<Homepage />} />
-              <Route path={"/signIn"} element={<Authentication />} />
-              <Route path={"/not-found"} element={<NotFound />} />
               <Route path="*" element={<Navigate to="/not-found" replace />} />
             </Routes>
           </div>
