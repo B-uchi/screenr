@@ -1,18 +1,23 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { IoCloudUploadOutline } from "react-icons/io5";
 import { connect } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Toaster, toast } from "sonner";
 import { IoMdClose } from "react-icons/io";
 import { setCurrentUser } from "../redux/user/user.actions";
+import { MdOutlineAccountCircle } from "react-icons/md";
 
 const Homepage = ({ currentUser }) => {
   const [jobDescription, setJobDescription] = useState("");
   const [uploadModal, setUploadModal] = useState(false);
   const [JDModal, setJDModal] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [changeButtonText, setChangeButtonText] = useState(false);
-  const navigate = useNavigate();
+  const [changeJDButtonText, setChangeJDButtonText] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [accountIconModal, setAccountIconModal] = useState(false);
+  const fileInputRef = useRef(null);
+
+  console.log(selectedFiles);
 
   const handleFileChange = (event) => {
     const newFiles = event.target.files;
@@ -29,8 +34,10 @@ const Homepage = ({ currentUser }) => {
     setSelectedFiles([...selectedFiles, ...validFiles]);
   };
 
-  const handleUpload = () => {
-    setChangeButtonText(true);
+  const handleButtonClick = () => {
+    setSelectedFiles([]);
+    fileInputRef.current.click();
+    setChangeJDButtonText(true);
     console.log("Uploading files:", selectedFiles);
   };
 
@@ -39,8 +46,8 @@ const Homepage = ({ currentUser }) => {
       if (currentUser) {
         toast.error("Backend not connected yet");
       } else {
-        navigate("/signIn");
         toast.message("User must be signed in to analyze CV's");
+        signInWithGoogle();
       }
     } else {
       toast.error("Job description too short");
@@ -61,10 +68,7 @@ const Homepage = ({ currentUser }) => {
         toast.message("Signed in as " + user.email);
         setCurrentUser(user);
         sessionStorage.setItem("token", token);
-        setTimeout(() => {
-          navigate("/");
-          setLoading(false);
-        }, 1000);
+        setLoading(false);
       })
       .catch((error) => {
         setLoading(false);
@@ -75,12 +79,25 @@ const Homepage = ({ currentUser }) => {
 
   return (
     <main className="flex justify-center">
+      {loading && (
+        <div className="absolute h-full bg-white bg-opacity-40 w-full flex justify-center items-center">
+          <div className="spinner"></div>
+        </div>
+      )}
       <Toaster richColors position="top-right" />
       <div className="text-white flex flex-col lg:w-[50%] w-full mt-[50px]">
-        <div className="mb-[60px] flex justify-end justify-self-end">
+        <div className="mb-[60px] relative flex justify-end justify-self-end">
           {currentUser ? (
-            <button className="mr-10">
-              <img src={currentUser.photoURL} className="rounded-full w-[40px]" alt="" />
+            <button
+              onClick={() => {
+                setAccountIconModal(!accountIconModal);
+              }}
+              className="mr-10 rounded-full bg-white text-black p-1"
+            >
+              <div className="p-1">
+                <small className="block">Account</small>
+                <small>Icon</small>
+              </div>
             </button>
           ) : (
             <button
@@ -92,6 +109,34 @@ const Homepage = ({ currentUser }) => {
                 <small>Sign In</small>
               </div>
             </button>
+          )}
+          {accountIconModal && (
+            <div className="absolute bg-[#000300] border-[1px] border-[#5F5000] p-2 bottom-0 translate-y-[110%] right-10">
+              <ul>
+                <li>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={currentUser.photoURL}
+                      className="w-8 rounded-full"
+                      alt=""
+                    />
+                    <small className="text-[15px]">
+                      {currentUser.displayName}
+                    </small>
+                  </div>
+                </li>
+                <li className="mt-1">
+                  <a href="mailto:random.search.corp@gmail.com">
+                    <small className="text-[15px]">Support Request</small>
+                  </a>
+                </li>
+                <li className="mt-1">
+                  <a href="#">
+                    <small className="text-[15px]">Billing</small>
+                  </a>
+                </li>
+              </ul>
+            </div>
           )}
         </div>
         <div className="flex flex-row justify-evenly">
@@ -108,13 +153,26 @@ const Homepage = ({ currentUser }) => {
               }}
               className="h-[59px] w-[158px] bg-[#3a3a3a]"
             >
-              {!changeButtonText
+              {!changeJDButtonText
                 ? "Paste your job description"
                 : "Job description pasted"}
             </button>
-            <button className="h-[59px] w-[158px] bg-[#3a3a3a]">
-              Upload some CV
+            <button
+              onClick={() => handleButtonClick()}
+              className="h-[59px] w-[158px] bg-[#3a3a3a]"
+            >
+              {selectedFiles.length > 0
+                ? selectedFiles.length + " CV uploaded"
+                : "Upload some CV"}
             </button>
+            <input
+              type="file"
+              accept=".pdf"
+              multiple
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+            />
             <button
               onClick={() => analyzeCV()}
               className="h-[42px] w-[158px] bg-[#144d00]"
@@ -158,11 +216,11 @@ const Homepage = ({ currentUser }) => {
         </div>
       )}
       {JDModal && (
-        <div className="absolute flex flex-col justify-center items-center bg-white w-full h-full">
+        <div className="absolute md:p-0 p-2 flex flex-col justify-center items-center bg-white w-full h-full">
           <div className="">
             <textarea
               style={{ resize: "none" }}
-              className="p-2"
+              className="p-2 w-full border-[1px] border-[#e1e1e1]"
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               rows={15}
@@ -173,7 +231,7 @@ Just include the essence of the job, tasks, deliverables, requirements, qualific
             <div className="flex justify-center gap-5 mt-3 text-white font-semibold">
               <button
                 onClick={() => {
-                  setChangeButtonText(true);
+                  setChangeJDButtonText(true);
                   setJDModal(false);
                 }}
                 className="h-[56px] w-[174px] bg-[#000000]"
@@ -181,7 +239,11 @@ Just include the essence of the job, tasks, deliverables, requirements, qualific
                 Confirm
               </button>
               <button
-                onClick={() => setJDModal(false)}
+                onClick={() => {
+                  setJDModal(false);
+                  setJobDescription("");
+                  setChangeJDButtonText(false);
+                }}
                 className="h-[56px] w-[174px] bg-[#3a3a3a]"
               >
                 Cancel
